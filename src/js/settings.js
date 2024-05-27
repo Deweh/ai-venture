@@ -1,4 +1,5 @@
 import React from "react";
+import { Tabs } from ".";
 
 export class SettingFields {
     static ApiType = "api-type"
@@ -28,7 +29,7 @@ export var AppSettings = {
     "api-strict-compliance": false
 };
 
-const SettingTextBox = (props) => {
+export const SettingTextBox = (props) => {
     const [focused, setFocused] = React.useState(false);
 
     return (
@@ -46,7 +47,7 @@ const SettingTextBox = (props) => {
     );
 }
 
-const SettingCheckBox = (props) => {
+export const SettingCheckBox = (props) => {
     return(
         <div className="flex-horizontal">
             <span className="center">{props.displayName}</span>
@@ -63,7 +64,7 @@ const SettingCheckBox = (props) => {
     );
 }
 
-const SettingTextArea = (props) => {
+export const SettingTextArea = (props) => {
     return(
         <div>
             <span>{props.displayName}</span>
@@ -77,7 +78,7 @@ const SettingTextArea = (props) => {
     );
 }
 
-const SettingSelection = (props) => {
+export const SettingSelection = (props) => {
     let options = [];
     for(const [key, value] of Object.entries(props.options)){
         options.push(
@@ -142,38 +143,6 @@ export class SettingsTab{
 export class Settings extends React.Component{
     settingsCopy = { ...AppSettings }
 
-    state = {
-        activeTab: SettingsTab.AI
-    }
-
-    onTabSelected = (id) => {
-        this.setState({ activeTab: id });
-    }
-
-    renderTabBtn = (id, displayName) => {
-        let isActive = (this.state.activeTab == id);
-        return (
-            <button className={isActive ? "selected" : ""} disabled={isActive} onClick={() => { this.onTabSelected(id) }}>{displayName}</button>
-        );
-    }
-
-    renderActiveTab = () => {
-        switch(this.state.activeTab){
-            case SettingsTab.API:
-                return <APIOptions data={this.data}/>;
-            case SettingsTab.Prompts:
-                return <PromptOptions data={this.data}/>;
-            case SettingsTab.AI:
-                return <AIOptions data={this.data}/>
-            default:
-                return <div></div>
-        }
-    }
-
-    startClose = () => {
-        this.setState({ closing: true });
-    }
-
     applySettings = () => {
         AppSettings = { ...this.settingsCopy };
         window.localStorage.setItem("settings", JSON.stringify(AppSettings));
@@ -194,23 +163,24 @@ export class Settings extends React.Component{
 
     render(){
         return (
-            <div className="flex-vertical h100">
-                <div className="flex-horizontal" key="window-buttons-row">
-                    <div className="flex-fill"/>
-                    <button className="close-btn" onClick={this.props.onClose}>
-                        <span className="material-symbols-outlined button small">close</span>
-                    </button>
-                </div>
-                
-                <div className="flex-horizontal" style={{"gap": "2vh", "justifyContent": "center"}} key="tabs-row">
-                    {this.renderTabBtn(SettingsTab.AI, "AI")}
-                    {this.renderTabBtn(SettingsTab.Prompts, "Prompts")}
-                    {this.renderTabBtn(SettingsTab.API, "API")}
-                </div>
-
-                <div className="options-container">
-                    {this.renderActiveTab()}
-                </div>
+            <div className="flex-vertical flex-fill">
+                <Tabs
+                    tabs={{
+                        [SettingsTab.AI]: {
+                            displayName: "AI",
+                            render: () => <AIOptions data={this.data}/>
+                        },
+                        [SettingsTab.Prompts]: {
+                            displayName: "Prompts",
+                            render: () => <PromptOptions data={this.data}/>
+                        },
+                        [SettingsTab.API]: {
+                            displayName: "API",
+                            render: () => <APIOptions data={this.data}/>
+                        },
+                    }}
+                    
+                    initialTab={SettingsTab.AI}/>
 
                 <div className="flex-horizontal" style={{"gap": "1vh"}} key="finish-buttons-row">
                     <div className="flex-fill"/>

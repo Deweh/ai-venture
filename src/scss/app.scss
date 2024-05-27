@@ -124,6 +124,10 @@ body{
     flex-wrap: wrap;
     display: flex;
     flex-direction: column;
+
+    &.nw{
+        flex-wrap: nowrap;
+    }
 }
 
 .flex-horizontal{
@@ -257,12 +261,12 @@ input[type=checkbox] + .check{
     user-select: none;
     pointer-events: none;
     opacity: 0%;
-    transition: opacity 0.05s;
+    transition: opacity 0.1s, transform 0.1s;
     display: inline;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -55%);
+    transform: translate(-50%, -30%) scale(0.5);
 }
 
 input[type=checkbox]:checked{
@@ -271,6 +275,7 @@ input[type=checkbox]:checked{
 
 input[type=checkbox]:checked + .check{
     opacity: 100%;
+    transform: translate(-50%, -55%) scale(1.0);
 }
 
 input[type=text], input[type=password]{
@@ -411,6 +416,7 @@ select{
 .options-container{
     @extend .flex-vertical;
     @extend .flex-fill;
+    flex-wrap: nowrap;
     margin-top: 1.5vh;
     margin-bottom: 1.5vh;
     background: rgba(80,80,80, 0.3);

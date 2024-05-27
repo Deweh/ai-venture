@@ -1,17 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client"
 import "../scss/app.scss";
-import { PopUp, Content, Settings, AppSettings, OpenAIRequest, SettingFields } from ".";
+import { PopUp, Content, Settings, AppSettings, OpenAIRequest, SettingFields, Presets } from ".";
 
-export class PopupType{
-    static None = null;
-    static Settings = "settings";
-}
+export var SetStoryText = null;
+export var GetStoryText = null;
 
 export class App extends React.Component{
     state = {
         storyText: "",
-        popupType: PopupType.None,
+        popupRender: null,
         loading: false
     }
 
@@ -21,6 +19,9 @@ export class App extends React.Component{
         if(storedStory != null) {
             this.state.storyText = storedStory;
         }
+
+        SetStoryText = (txt) => { this.setState({ storyText: txt }) };
+        GetStoryText = () => { return this.state.storyText };
     }
 
     lastRequest = null
@@ -66,26 +67,37 @@ export class App extends React.Component{
         }
     }
 
-    onSettingsClicked = () => {
-        //alert("storyText is " + this.state.storyText);
-        this.setState({ popupType: PopupType.Settings });
+    openPopup(a_render){
+        this.setState({ popupRender: a_render })
     }
 
     closePopup = () => {
-        this.setState({ popupType: PopupType.None });
+        this.setState({ popupRender: null });
     }
 
-    renderPopupChildren = (onCloseFunc) => {
-        switch(this.state.popupType){
-            case PopupType.Settings:
-                return <Settings onClose={onCloseFunc}/>
+    showPopup = (type) => {
+        let renderFunc = null;
+        switch(type){
+            case "settings":
+                renderFunc = (onClose) => <Settings key="settings-popup" onClose={onClose}/>;
+                break;
+            case "presets":
+                renderFunc = (onClose) => <Presets key="presets-popup" onClose={onClose}/>;
+                break;
             default:
-                return <div/>
+                break;
+        }
+        if(renderFunc != null){
+            this.openPopup(renderFunc);
         }
     }
 
+    renderPopupChildren = (onCloseFunc) => {
+        return this.state.popupRender(onCloseFunc);
+    }
+
     renderPopup = () => {
-        if(this.state.popupType != null) {
+        if(this.state.popupRender != null) {
             return <PopUp onClose={this.closePopup} renderChildren={this.renderPopupChildren}/>;
         } else {
             return <div/>
@@ -97,7 +109,7 @@ export class App extends React.Component{
             <div>
                 <Content
                     storyText={this.state.storyText}
-                    onSettingsClicked={this.onSettingsClicked}
+                    showPopup={this.showPopup}
                     loading={this.state.loading}
                     onSend={this.onSend}
                     onCancel={this.onCancel}
