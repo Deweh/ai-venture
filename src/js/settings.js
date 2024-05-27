@@ -28,32 +28,82 @@ export var AppSettings = {
     "api-strict-compliance": false
 };
 
+const SettingTextBox = (props) => {
+    const [focused, setFocused] = React.useState(false);
+
+    return (
+        <div className="flex-horizontal">
+            <span className="center">{props.displayName}</span>
+            <input
+                type={(!focused && props.secure) ? "password" : "text"}
+                className="flex-fill"
+                defaultValue={props.data.settings[props.id]}
+                onChange={(e) => props.data.onValueChange(props.id, e)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                />
+        </div>
+    );
+}
+
+const SettingCheckBox = (props) => {
+    return(
+        <div className="flex-horizontal">
+            <span className="center">{props.displayName}</span>
+            <div className="checkbox-container">
+                <input 
+                    type="checkbox"
+                    defaultChecked={props.data.settings[props.id]}
+                    onChange={(e) => props.data.onValueChange(props.id, e, true)}
+                    />
+                <span className="material-symbols-outlined check button">check</span>
+            </div>
+            
+        </div>
+    );
+}
+
+const SettingTextArea = (props) => {
+    return(
+        <div>
+            <span>{props.displayName}</span>
+            <div className="flex-horizontal">
+                <textarea
+                    className="flex-fill rv"
+                    defaultValue={props.data.settings[props.id]}
+                    onChange={(e) => props.data.onValueChange(props.id, e)}/>
+            </div>
+        </div>
+    );
+}
+
+const SettingSelection = (props) => {
+    let options = [];
+    for(const [key, value] of Object.entries(props.options)){
+        options.push(
+            <option key={props.id + key} value={key}>{value}</option>
+        );
+    }
+
+    return (
+        <div className="flex-horizontal">
+            <span className="center">{props.displayName}</span>
+            <select defaultValue={props.data.settings[props.id]} onChange={(e) => props.data.onValueChange(props.id, e)}>
+                {options}
+            </select>
+        </div>
+    );
+}
+
 class APIOptions extends React.Component{
     render() {
         return(
             <div className="flex-vertical" style={{"gap": "1vh"}}>
-                <div className="flex-horizontal">
-                    <span className="center">API Type:</span>
-                    <select defaultValue={this.props.settingsCopy[SettingFields.ApiType]} onChange={(e) => this.props.onValueChange(SettingFields.ApiType, e)}>
-                        <option value="openai">OpenAI Compatible</option>
-                    </select>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">API URL:</span>
-                    <input type="text" className="flex-fill" defaultValue={this.props.settingsCopy[SettingFields.ApiUrl]} onChange={(e) => this.props.onValueChange(SettingFields.ApiUrl, e)}></input>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">API Key:</span>
-                    <input type="text" className="flex-fill" defaultValue={this.props.settingsCopy[SettingFields.ApiKey]} onChange={(e) => this.props.onValueChange(SettingFields.ApiKey, e)}></input>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">Model:</span>
-                    <input type="text" className="flex-fill" defaultValue={this.props.settingsCopy[SettingFields.ApiModel]} onChange={(e) => this.props.onValueChange(SettingFields.ApiModel, e)}></input>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">Strict Compliance:</span>
-                    <input type="checkbox" defaultChecked={this.props.settingsCopy[SettingFields.ApiStrictCompliance]} onChange={(e) => this.props.onValueChange(SettingFields.ApiStrictCompliance, e, true)}></input>
-                </div>
+                <SettingSelection data={this.props.data} displayName="API Type:" id={SettingFields.ApiType} options={{ "openai": "OpenAI Compatible" }}/>
+                <SettingTextBox data={this.props.data} displayName="API URL:" id={SettingFields.ApiUrl}/>
+                <SettingTextBox data={this.props.data} displayName="API Key:" id={SettingFields.ApiKey} secure={true}/>
+                <SettingTextBox data={this.props.data} displayName="Model:" id={SettingFields.ApiModel}/>
+                <SettingCheckBox data={this.props.data} displayName="Strict Compliance:" id={SettingFields.ApiStrictCompliance}/>
             </div>
         );
     }
@@ -63,14 +113,8 @@ class PromptOptions extends React.Component{
     render() {
         return(
             <div className="flex-vertical" style={{"gap": "1vh"}}>
-                <span style={{"margin-right": "1vh"}}>System Prompt:</span>
-                <div className="flex-horizontal">
-                    <textarea className="flex-fill rv" defaultValue={this.props.settingsCopy[SettingFields.SystemPrompt]} onChange={(e) => this.props.onValueChange(SettingFields.SystemPrompt, e)}/>
-                </div>
-                <span style={{"margin-right": "1vh"}}>Prompt Format:</span>
-                <div className="flex-horizontal">
-                    <textarea className="flex-fill rv" defaultValue={this.props.settingsCopy[SettingFields.PromptFormat]} onChange={(e) => this.props.onValueChange(SettingFields.PromptFormat, e)}/>
-                </div>
+                <SettingTextArea data={this.props.data} displayName="System Prompt:" id={SettingFields.SystemPrompt}/>
+                <SettingTextArea data={this.props.data} displayName="Prompt Format:" id={SettingFields.PromptFormat}/>
             </div>
         );
     }
@@ -80,22 +124,10 @@ class AIOptions extends React.Component{
     render() {
         return(
             <div className="flex-vertical" style={{"gap": "1vh"}}>
-                <div className="flex-horizontal">
-                    <span className="center">Max Tokens:</span>
-                    <input type="text" defaultValue={this.props.settingsCopy[SettingFields.MaxTokens]} onChange={(e) => this.props.onValueChange(SettingFields.MaxTokens, e)}/>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">Temperature:</span>
-                    <input type="text" defaultValue={this.props.settingsCopy[SettingFields.Temperature]} onChange={(e) => this.props.onValueChange(SettingFields.Temperature, e)}/>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">Top-P:</span>
-                    <input type="text" defaultValue={this.props.settingsCopy[SettingFields.TopP]} onChange={(e) => this.props.onValueChange(SettingFields.TopP, e)}/>
-                </div>
-                <div className="flex-horizontal">
-                    <span className="center">Repeat Penalty:</span>
-                    <input type="text" defaultValue={this.props.settingsCopy[SettingFields.RepeatPenalty]} onChange={(e) => this.props.onValueChange(SettingFields.RepeatPenalty, e)}/>
-                </div>
+                <SettingTextBox data={this.props.data} displayName="Max Tokens:" id={SettingFields.MaxTokens}/>
+                <SettingTextBox data={this.props.data} displayName="Temperature:" id={SettingFields.Temperature}/>
+                <SettingTextBox data={this.props.data} displayName="Top-P:" id={SettingFields.TopP}/>
+                <SettingTextBox data={this.props.data} displayName="Repeat Penalty:" id={SettingFields.RepeatPenalty}/>
             </div>
         );
     }
@@ -128,11 +160,11 @@ export class Settings extends React.Component{
     renderActiveTab = () => {
         switch(this.state.activeTab){
             case SettingsTab.API:
-                return <APIOptions onValueChange={this.onValueChange} settingsCopy={this.settingsCopy}/>;
+                return <APIOptions data={this.data}/>;
             case SettingsTab.Prompts:
-                return <PromptOptions onValueChange={this.onValueChange} settingsCopy={this.settingsCopy}/>;
+                return <PromptOptions data={this.data}/>;
             case SettingsTab.AI:
-                return <AIOptions onValueChange={this.onValueChange} settingsCopy={this.settingsCopy}/>
+                return <AIOptions data={this.data}/>
             default:
                 return <div></div>
         }
@@ -153,6 +185,11 @@ export class Settings extends React.Component{
         } else {
             this.settingsCopy[id] = event.target.checked;
         }
+    }
+
+    data = {
+        settings: this.settingsCopy,
+        onValueChange: this.onValueChange
     }
 
     render(){

@@ -94,6 +94,7 @@ body{
 ::-webkit-scrollbar-thumb{
     background-color: rgba(180,180,180,0.3);
     border-radius: 10px;
+    cursor: default;
 
     &:hover{
         background: rgba(200,200,200,0.5);
@@ -232,7 +233,47 @@ textarea:disabled{
     color: rgb(80,80,80);
 }
 
-input[type=text]{
+.checkbox-container{
+    position: relative;
+    display: inline-block;
+}
+
+input[type=checkbox]{
+    appearance: none;
+    margin: 0vh 1vh 0vh 1vh;
+    border-radius: 5px;
+    padding: 1.5vh;
+    background-color: rgba(0,0,0,0.5);
+    border: 1px solid rgb(80,80,80);
+    color: white;
+    font-family:monospace;
+    font-size: $main-font-size;
+    transition: border 0.05s;
+    transition-timing-function: cubic-bezier(.17,.67,.83,.67);
+    resize: none;
+}
+
+input[type=checkbox] + .check{
+    user-select: none;
+    pointer-events: none;
+    opacity: 0%;
+    transition: opacity 0.05s;
+    display: inline;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+}
+
+input[type=checkbox]:checked{
+    border: 1px solid rgb(210,210,210);
+}
+
+input[type=checkbox]:checked + .check{
+    opacity: 100%;
+}
+
+input[type=text], input[type=password]{
     margin: 0vh 1vh 0vh 1vh;
     border-radius: 5px;
     padding: 1vh 2vh 1vh 2vh;
@@ -246,16 +287,16 @@ input[type=text]{
     resize: none;
 }
 
-input[type=text]:hover{
+input[type=text]:hover, input[type=password]:hover, input[type=checkbox]:hover{
     border: 1px solid rgb(150,150,150);
 }
 
-input[type=text]:focus{
+input[type=text]:focus, input[type=password]:focus{
     border: 1px solid rgb(200,200,200);
     outline: none;
 }
 
-input[type=text]:disabled{
+input[type=text]:disabled, input[type=password]:disabled{
     border: 1px solid rgb(80,80,80);
     color: rgb(80,80,80);
 }
