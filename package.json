@@ -1,0 +1,19 @@
+{
+  "name": "ai-venture",
+  "version": "1.0.0",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "build-nsm": "parcel build --no-source-maps"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.0.0",
+    "parcel": "^2.12.0",
+    "process": "^0.11.10"
+  }
+}
