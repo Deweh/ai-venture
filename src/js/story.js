@@ -4,12 +4,12 @@ export class Story extends React.Component{
     storyText = React.createRef();
 
     componentDidMount() {
-        this.storyText.current.scrollTo({top: this.storyText.current.scrollHeight, behavior: "smooth"});
+        this.storyText.current.scrollTo({top: this.storyText.current.scrollHeight, behavior: "instant"});
     }
 
     componentDidUpdate() {
         if(this.props.readOnly){
-            this.storyText.current.scrollTo({top: this.storyText.current.scrollHeight, behavior: "smooth"});
+            this.storyText.current.scrollTo({top: this.storyText.current.scrollHeight, behavior: "instant"});
         }
         window.localStorage.setItem("story", this.props.text);
     }

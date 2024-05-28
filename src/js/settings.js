@@ -12,11 +12,15 @@ export class SettingFields {
     static MaxTokens = "max-tokens"
     static Temperature = "temperature"
     static TopP = "top_p"
+    static TopK = "top_k"
     static ApiStrictCompliance = "api-strict-compliance"
+    static SysPromptCompat = "sys-prompt-compat"
+    static PresentPenalty = "present-penalty"
+    static FrequencyPenalty = "freq-penalty"
 }
 
 export var AppSettings = {
-    "api-type": "openai",
+    "api-type": "openai-chat",
     "api-url": "http://127.0.0.1:8080/",
     "api-key": "-",
     "system-prompt": "You are a helpful assistant.",
@@ -26,7 +30,11 @@ export var AppSettings = {
     "top_p": 0.95,
     "api-model": "",
     "repeat-penalty": 1.0,
-    "api-strict-compliance": false
+    "api-strict-compliance": false,
+    "sys-prompt-compat": false,
+    "top_k": 0,
+    "present-penalty": 0,
+    "freq-penalty": 0
 };
 
 export const SettingTextBox = (props) => {
@@ -100,11 +108,16 @@ class APIOptions extends React.Component{
     render() {
         return(
             <div className="flex-vertical" style={{"gap": "1vh"}}>
-                <SettingSelection data={this.props.data} displayName="API Type:" id={SettingFields.ApiType} options={{ "openai": "OpenAI Compatible" }}/>
+                <SettingSelection data={this.props.data} displayName="API Type:" id={SettingFields.ApiType}
+                    options={{
+                        "openai-chat": "OpenAI Chat Completion",
+                        "openai-text": "OpenAI Text Completion"
+                    }}/>
                 <SettingTextBox data={this.props.data} displayName="API URL:" id={SettingFields.ApiUrl}/>
                 <SettingTextBox data={this.props.data} displayName="API Key:" id={SettingFields.ApiKey} secure={true}/>
                 <SettingTextBox data={this.props.data} displayName="Model:" id={SettingFields.ApiModel}/>
                 <SettingCheckBox data={this.props.data} displayName="Strict Compliance:" id={SettingFields.ApiStrictCompliance}/>
+                <SettingCheckBox data={this.props.data} displayName="System Prompt Compatibility Mode:" id={SettingFields.SysPromptCompat}/>
             </div>
         );
     }
@@ -128,7 +141,10 @@ class AIOptions extends React.Component{
                 <SettingTextBox data={this.props.data} displayName="Max Tokens:" id={SettingFields.MaxTokens}/>
                 <SettingTextBox data={this.props.data} displayName="Temperature:" id={SettingFields.Temperature}/>
                 <SettingTextBox data={this.props.data} displayName="Top-P:" id={SettingFields.TopP}/>
+                <SettingTextBox data={this.props.data} displayName="Top-K:" id={SettingFields.TopK}/>
                 <SettingTextBox data={this.props.data} displayName="Repeat Penalty:" id={SettingFields.RepeatPenalty}/>
+                <SettingTextBox data={this.props.data} displayName="Frequency Penalty" id={SettingFields.FrequencyPenalty}/>
+                <SettingTextBox data={this.props.data} displayName="Presence Penalty:" id={SettingFields.PresentPenalty}/>
             </div>
         );
     }

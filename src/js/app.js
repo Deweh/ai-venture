@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client"
 import "../scss/app.scss";
-import { PopUp, Content, Settings, AppSettings, OpenAIRequest, SettingFields, Presets } from ".";
+import { PopUp, Content, Settings, AppSettings, OpenAIChatRequest, OpenAITextRequest, SettingFields, Presets } from ".";
 
 export var SetStoryText = null;
 export var GetStoryText = null;
@@ -44,18 +44,35 @@ export class App extends React.Component{
     }
 
     onSend = (value) => {
+        let req = null;
+        switch(AppSettings[SettingFields.ApiType]){
+            case "openai-chat":
+                req = new OpenAIChatRequest();
+                break;
+            case "openai-text":
+                req = new OpenAITextRequest();
+                break;
+            default:
+                alert("Invalid API type, please select a different API type in settings.");
+                return;
+        }
+
         this.storyBuffer = (this.state.storyText + value);
         this.setState({ storyText: this.storyBuffer, loading: true });
-        let req = new OpenAIRequest();
         req.url = AppSettings[SettingFields.ApiUrl];
         req.apiKey = AppSettings[SettingFields.ApiKey];
         req.maxTokens = AppSettings[SettingFields.MaxTokens];
         req.temperature = AppSettings[SettingFields.Temperature];
         req.top_p = AppSettings[SettingFields.TopP];
-        req.repeat_penality = AppSettings[SettingFields.RepeatPenalty];
+        req.top_k = AppSettings[SettingFields.TopK];
+        req.frequency_penalty = AppSettings[SettingFields.FrequencyPenalty];
+        req.present_penalty = AppSettings[SettingFields.PresentPenalty];
+        req.repeat_penalty = AppSettings[SettingFields.RepeatPenalty];
         req.model = AppSettings[SettingFields.ApiModel];
         req.system_message = AppSettings[SettingFields.SystemPrompt];
         req.strict_compliance = AppSettings[SettingFields.ApiStrictCompliance];
+        req.sys_prompt_compat = AppSettings[SettingFields.SysPromptCompat];
+        req.prompt_format = AppSettings[SettingFields.PromptFormat]
         req.SendPrompt(this.storyBuffer, this.onStreamUpdate);
         this.lastRequest = req;
     }
@@ -85,6 +102,7 @@ export class App extends React.Component{
                 renderFunc = (onClose) => <Presets key="presets-popup" onClose={onClose}/>;
                 break;
             default:
+                alert("Not yet implemented.");
                 break;
         }
         if(renderFunc != null){
