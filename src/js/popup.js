@@ -18,7 +18,7 @@ export class PopUp extends React.Component{
     render(){
         return (
             <div className={"onTop " + (this.state.closing ? "fade-out" : "fade-in")} onAnimationEnd={this.onAnimEnd}>
-                <div className="popup-window">
+                <div className={"popup-window " + (this.state.closing ? "pop-closed-center" : "pop-open-center")}>
                     <div className="flex-vertical h100">
                         <div className="flex-horizontal" key="window-buttons-row">
                             <div className="flex-fill"/>

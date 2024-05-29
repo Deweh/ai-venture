@@ -65,8 +65,10 @@ class StoriesOptions extends React.Component{
                 </button>
             </div>
         );
+        let txt = GetStoryText();
         for(const i in this.state.storiesList){
             const s = this.state.storiesList[i];
+            let isLoaded = (txt == s.value);
             elems.push(
                 <div key={i} className="flex-horizontal" style={{"marginTop": "1vh", "gap": "0.1vh"}}>
                     <span className="center">{s.time}</span>
@@ -74,8 +76,8 @@ class StoriesOptions extends React.Component{
                     <button className="square" style={{"marginRight": "1vh"}} onClick={() => this.deleteStory(i)}>
                         <span className="material-symbols-outlined button">delete</span>
                     </button>
-                    <button className="square" style={{"marginRight": "1vh"}} onClick={() => this.loadStory(i)}>
-                        <span className="material-symbols-outlined button">import_contacts</span>
+                    <button className="square" style={{"marginRight": "1vh"}} disabled={isLoaded} onClick={() => this.loadStory(i)}>
+                        <span className="material-symbols-outlined button">{isLoaded ? "check" : "import_contacts"}</span>
                     </button>
                 </div>
             );

@@ -37,6 +37,48 @@ export var AppSettings = {
     "freq-penalty": 0
 };
 
+export const Tooltip = (props) => {
+    const [active, setActive] = React.useState(false);
+    const [coords, setCoords] = React.useState({ x: 0, y: 0 });
+    
+    const shouldUse = () => {
+        return (props.text != null && props.text != undefined && props.text.length > 0);
+    }
+
+    const mouseMove = (e) => {
+        setCoords({ x: e.pageX, y: e.pageY });
+    }
+
+    const mouseOut = (e) => {
+        setActive(false);
+    }
+
+    const mouseOver = (e) => {
+        if(shouldUse()){
+            setCoords({ x: e.pageX, y: e.pageY });
+            setActive(true);
+        }
+    }
+
+    const renderTip = () => {
+        if(shouldUse()){
+            return (
+                <div className="floater" style={{"transform": "translate(" + (coords.x + 10) + "px, " + (coords.y + 10) + "px)", "opacity": (active ? "100%" : "0%")}}>
+                    {props.text}
+                </div>
+            );
+        }
+        return null;
+    }
+
+    return (
+        <span onMouseOver={mouseOver} onMouseOut={mouseOut} onMouseMove={(active ? mouseMove : () => {})}>
+            {props.children}
+            {renderTip()}
+        </span>
+    );
+}
+
 export const SettingTextBox = (props) => {
     const [focused, setFocused] = React.useState(false);
 
@@ -56,19 +98,24 @@ export const SettingTextBox = (props) => {
 }
 
 export const SettingCheckBox = (props) => {
+    const helpActive = () => {
+        return hovered && props.helpText != null && props.helpText != undefined;
+    }
+
     return(
-        <div className="flex-horizontal">
-            <span className="center">{props.displayName}</span>
-            <div className="checkbox-container">
-                <input 
-                    type="checkbox"
-                    defaultChecked={props.data.settings[props.id]}
-                    onChange={(e) => props.data.onValueChange(props.id, e, true)}
-                    />
-                <span className="material-symbols-outlined check button">check</span>
+        <Tooltip text={props.helpText}>
+            <div className="flex-horizontal">
+                <span className="center">{props.displayName}</span>
+                <div className="checkbox-container">
+                    <input 
+                        type="checkbox"
+                        defaultChecked={props.data.settings[props.id]}
+                        onChange={(e) => props.data.onValueChange(props.id, e, true)}
+                        />
+                    <span className="material-symbols-outlined check button">check</span>
+                </div>
             </div>
-            
-        </div>
+        </Tooltip>
     );
 }
 
@@ -116,8 +163,10 @@ class APIOptions extends React.Component{
                 <SettingTextBox data={this.props.data} displayName="API URL:" id={SettingFields.ApiUrl}/>
                 <SettingTextBox data={this.props.data} displayName="API Key:" id={SettingFields.ApiKey} secure={true}/>
                 <SettingTextBox data={this.props.data} displayName="Model:" id={SettingFields.ApiModel}/>
-                <SettingCheckBox data={this.props.data} displayName="Strict Compliance:" id={SettingFields.ApiStrictCompliance}/>
-                <SettingCheckBox data={this.props.data} displayName="System Prompt Compatibility Mode:" id={SettingFields.SysPromptCompat}/>
+                <SettingCheckBox data={this.props.data} displayName="Strict Compliance:" id={SettingFields.ApiStrictCompliance}
+                    helpText="With this option enabled, only AI settings known to work with this API type will be sent, otherwise all AI options will be sent."/>
+                <SettingCheckBox data={this.props.data} displayName="System Prompt Compatibility Mode:" id={SettingFields.SysPromptCompat}
+                    helpText="When using chat completion, usually the system prompt is sent as a separate message to the API, but some APIs don't support this. With this option enabled, the system prompt will be sent in the user message instead, formatted using the configured prompt format."/>
             </div>
         );
     }
