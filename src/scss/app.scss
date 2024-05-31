@@ -459,7 +459,7 @@ select{
     padding: 1vh;
     border-radius: 5px;
     font-size: $main-font-size;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     backdrop-filter: blur(5px);
@@ -468,4 +468,21 @@ select{
     color: white;
     user-select: none;
     pointer-events: none;
+
+    &.interactable{
+        pointer-events: auto;
+        user-select: auto;
+    }
 }
+
+.option-field{
+    padding: 1vh;
+    background-color: rgba(80,80,80,0.8);
+    border: 1px dashed rgba(130,130,130, 0.8);
+    border-radius: 8px;
+}
+
+.option-field:hover{
+    border: 1px solid rgba(130,130,130, 0.8);
+}
+

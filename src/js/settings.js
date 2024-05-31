@@ -1,5 +1,5 @@
 import React from "react";
-import { Tabs } from ".";
+import { Tabs, CreateAPIRequest } from ".";
 
 export class SettingFields {
     static ApiType = "api-type"
@@ -81,30 +81,62 @@ export const Tooltip = (props) => {
 
 export const SettingTextBox = (props) => {
     const [focused, setFocused] = React.useState(false);
+    const [text, setText] = React.useState(props.data.settings[props.id]);
+    const oldValueRef = React.useRef(props.data.settings[props.id]);
+
+    const processText = (txt) => {
+        if(props.isNumber == true && (isNaN(+txt) || txt.length < 1)) {
+            txt = oldValueRef.current;
+        } else {
+            oldValueRef.current = txt;
+        }
+        props.data.onValueChange(props.id, {target: {value: txt}});
+        setText(txt);
+    }
+
+    const onChange = (e) => {
+        processText(e.target.value);
+    }
+
+    const renderList = () => {
+        if("list" in props && props.list != null){
+            return (
+                <div style={{"position": "relative", "marginLeft": "1vh"}}>
+                    <div className="floater interactable flex-vertical" style={{"gap": "0.5vh"}}>
+                        {props.list.map((item, index) => (
+                            <button key={index} style={{"textAlign": "left"}} onClick={() => { processText(item) }}>{item}</button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    }
 
     return (
-        <div className="flex-horizontal">
+        <div className="option-field flex-horizontal">
             <span className="center">{props.displayName}</span>
-            <input
-                type={(!focused && props.secure) ? "password" : "text"}
-                className="flex-fill"
-                defaultValue={props.data.settings[props.id]}
-                onChange={(e) => props.data.onValueChange(props.id, e)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                />
+            <div className="flex-fill flex-vertical">
+                <input
+                    type={(!focused && props.secure) ? "password" : "text"}
+                    className="flex-fill"
+                    value={text}
+                    onChange={onChange}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    />
+                {renderList()}
+            </div>
+            {props.children}
         </div>
     );
 }
 
 export const SettingCheckBox = (props) => {
-    const helpActive = () => {
-        return hovered && props.helpText != null && props.helpText != undefined;
-    }
-
     return(
         <Tooltip text={props.helpText}>
-            <div className="flex-horizontal">
+            <div className="option-field flex-horizontal">
                 <span className="center">{props.displayName}</span>
                 <div className="checkbox-container">
                     <input 
@@ -114,6 +146,7 @@ export const SettingCheckBox = (props) => {
                         />
                     <span className="material-symbols-outlined check button">check</span>
                 </div>
+                {props.children}
             </div>
         </Tooltip>
     );
@@ -121,7 +154,7 @@ export const SettingCheckBox = (props) => {
 
 export const SettingTextArea = (props) => {
     return(
-        <div>
+        <div className="option-field">
             <span>{props.displayName}</span>
             <div className="flex-horizontal">
                 <textarea
@@ -129,6 +162,7 @@ export const SettingTextArea = (props) => {
                     defaultValue={props.data.settings[props.id]}
                     onChange={(e) => props.data.onValueChange(props.id, e)}/>
             </div>
+            {props.children}
         </div>
     );
 }
@@ -142,16 +176,64 @@ export const SettingSelection = (props) => {
     }
 
     return (
-        <div className="flex-horizontal">
+        <div className="option-field flex-horizontal">
             <span className="center">{props.displayName}</span>
-            <select defaultValue={props.data.settings[props.id]} onChange={(e) => props.data.onValueChange(props.id, e)}>
+            <select className="flex-fill" defaultValue={props.data.settings[props.id]} onChange={(e) => props.data.onValueChange(props.id, e)}>
                 {options}
             </select>
+            {props.children}
         </div>
     );
 }
 
 class APIOptions extends React.Component{
+    state = {
+        modelsState: 0,
+        modelsList: []
+    }
+
+    modelsRequest = null;
+
+    componentWillUnmount(){
+        if(this.modelsRequest != null){
+            this.modelsRequest.CancelRequest();
+            this.modelsRequest = null;
+        }
+    }
+
+    modelsLoading = () => {
+        return this.state.modelsState == 1;
+    }
+
+    modelsShown = () => {
+        return this.state.modelsState == 2;
+    }
+
+    modelsBtnIcon = () => {
+        if(this.modelsLoading()){
+            return "sync";
+        } else if (this.modelsShown()){
+            return "close";
+        } else {
+            return "list";
+        }
+    }
+
+    modelsBtnClicked = () => {
+        if(this.modelsShown()){
+            this.setState({modelsState: 0});
+        } else {
+            this.setState({modelsState: 1});
+            this.modelsRequest = CreateAPIRequest();
+            this.modelsRequest.url = this.props.data.settings[SettingFields.ApiUrl];
+            this.modelsRequest.apiKey = this.props.data.settings[SettingFields.ApiKey];
+            this.modelsRequest.GetModels((result) => {
+                this.setState({modelsState: 2, modelsList: result});
+                this.modelsRequest = null;
+            })
+        }
+    }
+
     render() {
         return(
             <div className="flex-vertical" style={{"gap": "1vh"}}>
@@ -162,7 +244,11 @@ class APIOptions extends React.Component{
                     }}/>
                 <SettingTextBox data={this.props.data} displayName="API URL:" id={SettingFields.ApiUrl}/>
                 <SettingTextBox data={this.props.data} displayName="API Key:" id={SettingFields.ApiKey} secure={true}/>
-                <SettingTextBox data={this.props.data} displayName="Model:" id={SettingFields.ApiModel}/>
+                <SettingTextBox data={this.props.data} displayName="Model:" id={SettingFields.ApiModel} list={(this.modelsShown() ? this.state.modelsList : null)}>
+                    <button className="square" disabled={this.modelsLoading()} onClick={this.modelsBtnClicked}>
+                        <span className={"material-symbols-outlined button " + (this.modelsLoading() ? "spin" : "")}>{this.modelsBtnIcon()}</span>
+                    </button>
+                </SettingTextBox>
                 <SettingCheckBox data={this.props.data} displayName="Strict Compliance:" id={SettingFields.ApiStrictCompliance}
                     helpText="With this option enabled, only AI settings known to work with this API type will be sent, otherwise all AI options will be sent."/>
                 <SettingCheckBox data={this.props.data} displayName="System Prompt Compatibility Mode:" id={SettingFields.SysPromptCompat}
@@ -187,13 +273,13 @@ class AIOptions extends React.Component{
     render() {
         return(
             <div className="flex-vertical" style={{"gap": "1vh"}}>
-                <SettingTextBox data={this.props.data} displayName="Max Tokens:" id={SettingFields.MaxTokens}/>
-                <SettingTextBox data={this.props.data} displayName="Temperature:" id={SettingFields.Temperature}/>
-                <SettingTextBox data={this.props.data} displayName="Top-P:" id={SettingFields.TopP}/>
-                <SettingTextBox data={this.props.data} displayName="Top-K:" id={SettingFields.TopK}/>
-                <SettingTextBox data={this.props.data} displayName="Repeat Penalty:" id={SettingFields.RepeatPenalty}/>
-                <SettingTextBox data={this.props.data} displayName="Frequency Penalty" id={SettingFields.FrequencyPenalty}/>
-                <SettingTextBox data={this.props.data} displayName="Presence Penalty:" id={SettingFields.PresentPenalty}/>
+                <SettingTextBox data={this.props.data} displayName="Max Tokens:" id={SettingFields.MaxTokens} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Temperature:" id={SettingFields.Temperature} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Top-P:" id={SettingFields.TopP} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Top-K:" id={SettingFields.TopK} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Repeat Penalty:" id={SettingFields.RepeatPenalty} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Frequency Penalty" id={SettingFields.FrequencyPenalty} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Presence Penalty:" id={SettingFields.PresentPenalty} isNumber={true}/>
             </div>
         );
     }

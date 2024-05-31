@@ -19,6 +19,37 @@ class OpenAIRequestBase extends ApiRequestBase{
         }
         return result;
     }
+
+    GetModels(callback){
+        this.controller = new AbortController();
+        fetch(this.url + "/models", {
+            signal: this.controller.signal,
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.apiKey}`
+            }
+        })
+        .then(response => {
+            if(!response.ok) {
+                throw new Error('Network Error');
+            }
+
+            response.json().then((result) => {
+                let arr = [];
+                for(const i in result.data){
+                    arr.push(result.data[i].id);
+                }
+                callback(arr);
+            })
+            .catch(error => {
+                callback([]);
+            });
+        })
+        .catch(error => {
+            console.error('SSE Error:', error);
+            callback([]);
+        });
+    }
 }
 
 export class OpenAITextRequest extends OpenAIRequestBase{

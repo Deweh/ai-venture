@@ -6,6 +6,17 @@ import { PopUp, Content, Settings, AppSettings, OpenAIChatRequest, OpenAITextReq
 export var SetStoryText = null;
 export var GetStoryText = null;
 
+export const CreateAPIRequest = () => {
+    switch(AppSettings[SettingFields.ApiType]){
+        case "openai-chat":
+            return new OpenAIChatRequest();
+        case "openai-text":
+            return new OpenAITextRequest();
+        default:
+            return null;
+    }
+}
+
 export class App extends React.Component{
     state = {
         storyText: "",
@@ -44,17 +55,10 @@ export class App extends React.Component{
     }
 
     onSend = (value) => {
-        let req = null;
-        switch(AppSettings[SettingFields.ApiType]){
-            case "openai-chat":
-                req = new OpenAIChatRequest();
-                break;
-            case "openai-text":
-                req = new OpenAITextRequest();
-                break;
-            default:
-                alert("Invalid API type, please select a different API type in settings.");
-                return;
+        let req = CreateAPIRequest();
+        if(req == null){
+            alert("Invalid API type, please select a different API type in settings.");
+            return;
         }
 
         this.storyBuffer = (this.state.storyText + value);

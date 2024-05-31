@@ -1,8 +1,116 @@
 import React from "react"
-import { Tabs, SetStoryText, GetStoryText } from "."
+import { Tabs, SetStoryText, GetStoryText, AppSettings, SettingFields } from "."
 
 class PresetsTab{
     static Stories = "stories";
+    static Prompts = "prompts";
+}
+
+class PromptPresetOptions extends React.Component{
+    state = {
+        presetsList: [],
+        currentSysPrompt: AppSettings[SettingFields.SystemPrompt],
+        currentFormat: AppSettings[SettingFields.PromptFormat]
+    }
+
+    presetNameRef = React.createRef();
+
+    constructor(props){
+        super(props);
+        let storedPresets = window.localStorage.getItem("promptPresets");
+        if(storedPresets != null){
+            this.state.presetsList = JSON.parse(storedPresets);
+        }
+    }
+
+    updateCurrent() {
+        this.setState({ currentSysPrompt: AppSettings[SettingFields.SystemPrompt], currentFormat: AppSettings[SettingFields.PromptFormat] })
+    }
+
+    saveToStorage(buf) {
+        window.localStorage.setItem("promptPresets", JSON.stringify(buf));
+    }
+
+    savePreset() {
+        let buffer = this.state.presetsList;
+        buffer.unshift({
+            name: this.presetNameRef.current.value.length < 1 ? "Untitled" : this.presetNameRef.current.value,
+            system: AppSettings[SettingFields.SystemPrompt],
+            format: AppSettings[SettingFields.PromptFormat]
+        })
+        this.saveToStorage(buffer);
+        this.setState({presetsList: buffer});
+        this.presetNameRef.current.value = "";
+    }
+
+    loadPreset(idx) {
+        AppSettings[SettingFields.SystemPrompt] = this.state.presetsList[idx].system;
+        AppSettings[SettingFields.PromptFormat] = this.state.presetsList[idx].format;
+        this.updateCurrent();
+    }
+
+    deletePreset(idx) {
+        if(confirm("Are you sure you wish to delete this preset?")) {
+            let buffer = this.state.presetsList;
+            buffer.splice(idx, 1);
+            this.saveToStorage(buffer);
+            this.setState({ presetsList: buffer });
+        }
+    }
+
+    render(){
+        let elems = [];
+        elems.push(
+            <div key="currents" className="flex-vertical">
+                <span>Current System Prompt:</span>
+                <div className="flex-horizontal">
+                    <textarea
+                        className="flex-fill rv"
+                        value={this.state.currentSysPrompt}
+                        readOnly={true}/>
+                </div>
+                <br/>
+                <span>Current Prompt Format:</span>
+                <div className="flex-horizontal">
+                    <textarea
+                        className="flex-fill rv"
+                        value={this.state.currentFormat}
+                        readOnly={true}/>
+                </div>
+                <br/>
+            </div>
+        );
+        elems.push(
+            <div key="main" className="option-field flex-horizontal">
+                <span className="center">Save Current Prompt Settings:</span>
+                <input
+                    type="text"
+                    className="flex-fill"
+                    ref={this.presetNameRef}
+                    onKeyDown={(e) => { if(e.key == "Enter") this.savePreset() }}
+                    />
+                <button className="square" style={{"marginRight": "1vh"}} onClick={() => this.savePreset()}>
+                    <span className="material-symbols-outlined button">add_circle</span>
+                </button>
+            </div>
+        );
+        for(const i in this.state.presetsList){
+            const s = this.state.presetsList[i];
+            let isLoaded = (this.state.currentFormat == s.format && this.state.currentSysPrompt == s.system);
+            elems.push(
+                <div key={i} className="option-field flex-horizontal" style={{"marginTop": "1vh", "gap": "0.1vh"}}>
+                    <span className="center flex-fill">{s.name}</span>
+                    <button className="square" style={{"marginRight": "1vh"}} onClick={() => this.deletePreset(i)}>
+                        <span className="material-symbols-outlined button">delete</span>
+                    </button>
+                    <button className="square" style={{"marginRight": "1vh"}} disabled={isLoaded} onClick={() => this.loadPreset(i)}>
+                        <span className="material-symbols-outlined button">{isLoaded ? "check" : "import_contacts"}</span>
+                    </button>
+                </div>
+            );
+        }
+        return elems;
+    }
 }
 
 class StoriesOptions extends React.Component{
@@ -52,7 +160,7 @@ class StoriesOptions extends React.Component{
     render(){
         let elems = [];
         elems.push(
-            <div key="main" className="flex-horizontal">
+            <div key="main" className="option-field flex-horizontal">
                 <span className="center">Save Current Story:</span>
                 <input
                     type="text"
@@ -70,7 +178,7 @@ class StoriesOptions extends React.Component{
             const s = this.state.storiesList[i];
             let isLoaded = (txt == s.value);
             elems.push(
-                <div key={i} className="flex-horizontal" style={{"marginTop": "1vh", "gap": "0.1vh"}}>
+                <div key={i} className="option-field flex-horizontal" style={{"marginTop": "1vh", "gap": "0.1vh"}}>
                     <span className="center">{s.time}</span>
                     <span className="center flex-fill">{s.name}</span>
                     <button className="square" style={{"marginRight": "1vh"}} onClick={() => this.deleteStory(i)}>
@@ -94,6 +202,10 @@ export class Presets extends React.Component{
                     [PresetsTab.Stories]: {
                         displayName: "Stories",
                         render: () => <StoriesOptions/>
+                    },
+                    [PresetsTab.Prompts]: {
+                        displayName: "Prompts",
+                        render: () => <PromptPresetOptions/>
                     }
                 }}
                 

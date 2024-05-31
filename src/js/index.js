@@ -1,4 +1,4 @@
-export { App, SetStoryText, GetStoryText } from "./app";
+export { App, SetStoryText, GetStoryText, CreateAPIRequest } from "./app";
 export { Content } from "./content";
 export { TextEntry } from "./textEntry";
 export { Story } from "./story"

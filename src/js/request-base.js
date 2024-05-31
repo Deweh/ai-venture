@@ -15,6 +15,7 @@ export class ApiRequestBase{
     sys_prompt_compat = false;
     prompt_format = "{input}"
 
+    GetModels(callback){}
     SendPrompt(input, callback){}
 
     CancelRequest(){
