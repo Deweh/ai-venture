@@ -1,42 +1,36 @@
 import React from "react"
-import { Tabs, SetStoryText, GetStoryText, AppSettings, SettingFields } from "."
+import { Tabs, SetStoryText, GetStoryText, AppSettings, Tooltip } from "."
 
 class PresetsTab{
     static Stories = "stories";
-    static Prompts = "prompts";
+    static Settings = "settings";
 }
 
-class PromptPresetOptions extends React.Component{
+class SettingPresetOptions extends React.Component{
     state = {
-        presetsList: [],
-        currentSysPrompt: AppSettings[SettingFields.SystemPrompt],
-        currentFormat: AppSettings[SettingFields.PromptFormat]
+        presetsList: []
     }
 
     presetNameRef = React.createRef();
 
     constructor(props){
         super(props);
-        let storedPresets = window.localStorage.getItem("promptPresets");
+        let storedPresets = window.localStorage.getItem("settingPresets");
         if(storedPresets != null){
             this.state.presetsList = JSON.parse(storedPresets);
         }
     }
 
-    updateCurrent() {
-        this.setState({ currentSysPrompt: AppSettings[SettingFields.SystemPrompt], currentFormat: AppSettings[SettingFields.PromptFormat] })
-    }
-
     saveToStorage(buf) {
-        window.localStorage.setItem("promptPresets", JSON.stringify(buf));
+        window.localStorage.setItem("settingPresets", JSON.stringify(buf));
     }
 
     savePreset() {
         let buffer = this.state.presetsList;
         buffer.unshift({
+            time: (new Date()).toLocaleString(),
             name: this.presetNameRef.current.value.length < 1 ? "Untitled" : this.presetNameRef.current.value,
-            system: AppSettings[SettingFields.SystemPrompt],
-            format: AppSettings[SettingFields.PromptFormat]
+            value: { ...AppSettings }
         })
         this.saveToStorage(buffer);
         this.setState({presetsList: buffer});
@@ -44,9 +38,9 @@ class PromptPresetOptions extends React.Component{
     }
 
     loadPreset(idx) {
-        AppSettings[SettingFields.SystemPrompt] = this.state.presetsList[idx].system;
-        AppSettings[SettingFields.PromptFormat] = this.state.presetsList[idx].format;
-        this.updateCurrent();
+        Object.assign(AppSettings, this.state.presetsList[idx].value);
+        window.localStorage.setItem("settings", JSON.stringify(AppSettings));
+        this.forceUpdate();
     }
 
     deletePreset(idx) {
@@ -61,28 +55,8 @@ class PromptPresetOptions extends React.Component{
     render(){
         let elems = [];
         elems.push(
-            <div key="currents" className="flex-vertical">
-                <span>Current System Prompt:</span>
-                <div className="flex-horizontal">
-                    <textarea
-                        className="flex-fill rv"
-                        value={this.state.currentSysPrompt}
-                        readOnly={true}/>
-                </div>
-                <br/>
-                <span>Current Prompt Format:</span>
-                <div className="flex-horizontal">
-                    <textarea
-                        className="flex-fill rv"
-                        value={this.state.currentFormat}
-                        readOnly={true}/>
-                </div>
-                <br/>
-            </div>
-        );
-        elems.push(
             <div key="main" className="option-field flex-horizontal">
-                <span className="center">Save Current Prompt Settings:</span>
+                <span className="center">Save Current Settings:</span>
                 <input
                     type="text"
                     className="flex-fill"
@@ -96,15 +70,17 @@ class PromptPresetOptions extends React.Component{
         );
         for(const i in this.state.presetsList){
             const s = this.state.presetsList[i];
-            let isLoaded = (this.state.currentFormat == s.format && this.state.currentSysPrompt == s.system);
+            let isLoaded = (Object.keys(AppSettings).length === Object.keys(s.value).length &&
+                            Object.keys(AppSettings).every(key => AppSettings[key] === s.value[key]));
             elems.push(
                 <div key={i} className="option-field flex-horizontal" style={{"marginTop": "1vh", "gap": "0.1vh"}}>
+                    <span className="center">{s.time}</span>
                     <span className="center flex-fill">{s.name}</span>
                     <button className="square" style={{"marginRight": "1vh"}} onClick={() => this.deletePreset(i)}>
                         <span className="material-symbols-outlined button">delete</span>
                     </button>
                     <button className="square" style={{"marginRight": "1vh"}} disabled={isLoaded} onClick={() => this.loadPreset(i)}>
-                        <span className="material-symbols-outlined button">{isLoaded ? "check" : "import_contacts"}</span>
+                        <span className="material-symbols-outlined button">{isLoaded ? "check" : "download"}</span>
                     </button>
                 </div>
             );
@@ -203,9 +179,9 @@ export class Presets extends React.Component{
                         displayName: "Stories",
                         render: () => <StoriesOptions/>
                     },
-                    [PresetsTab.Prompts]: {
-                        displayName: "Prompts",
-                        render: () => <PromptPresetOptions/>
+                    [PresetsTab.Settings]: {
+                        displayName: "Settings",
+                        render: () => <SettingPresetOptions/>
                     }
                 }}
                 
