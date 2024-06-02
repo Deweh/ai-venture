@@ -70,8 +70,8 @@ class SettingPresetOptions extends React.Component{
         );
         for(const i in this.state.presetsList){
             const s = this.state.presetsList[i];
-            let isLoaded = (Object.keys(AppSettings).length === Object.keys(s.value).length &&
-                            Object.keys(AppSettings).every(key => AppSettings[key] === s.value[key]));
+            let isLoaded = (Object.keys(AppSettings).length >= Object.keys(s.value).length &&
+                            Object.keys(s.value).every(key => AppSettings[key] === s.value[key]));
             elems.push(
                 <div key={i} className="option-field flex-horizontal" style={{"marginTop": "1vh", "gap": "0.1vh"}}>
                     <span className="center">{s.time}</span>

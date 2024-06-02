@@ -17,6 +17,8 @@ export class SettingFields {
     static SysPromptCompat = "sys-prompt-compat"
     static PresentPenalty = "present-penalty"
     static FrequencyPenalty = "freq-penalty"
+    static Tokenizer = "tokenizer"
+    static ContextLimit = "context-limit"
 }
 
 export var AppSettings = {
@@ -34,7 +36,9 @@ export var AppSettings = {
     "sys-prompt-compat": false,
     "top_k": 0,
     "present-penalty": 0,
-    "freq-penalty": 0
+    "freq-penalty": 0,
+    "tokenizer": "llama2",
+    "context-limit": 8192
 };
 
 export const SettingTextBox = (props) => {
@@ -236,8 +240,15 @@ class AIOptions extends React.Component{
                 <SettingTextBox data={this.props.data} displayName="Top-P:" id={SettingFields.TopP} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Top-K:" id={SettingFields.TopK} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Repeat Penalty:" id={SettingFields.RepeatPenalty} isNumber={true}/>
-                <SettingTextBox data={this.props.data} displayName="Frequency Penalty" id={SettingFields.FrequencyPenalty} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Frequency Penalty:" id={SettingFields.FrequencyPenalty} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Presence Penalty:" id={SettingFields.PresentPenalty} isNumber={true}/>
+                <SettingSelection data={this.props.data} displayName="Tokenizer:" id={SettingFields.Tokenizer}
+                    options={{
+                        "llama2": "LLaMA 1 & LLaMA 2",
+                        "llama3": "LLaMA 3",
+                        "mistral": "Mistral"
+                    }}/>
+                <SettingTextBox data={this.props.data} displayName="Context Limit:" id={SettingFields.ContextLimit} isNumber={true}/>
             </div>
         );
     }

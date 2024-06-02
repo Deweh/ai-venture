@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client"
 import "../scss/app.scss";
-import { PopUp, Content, Settings, AppSettings, OpenAIChatRequest, OpenAITextRequest, SettingFields, Presets } from ".";
+import { PopUp, Content, Settings, AppSettings, OpenAIChatRequest, OpenAITextRequest, SettingFields, Presets, Memory } from ".";
 
 export var SetStoryText = null;
 export var GetStoryText = null;
@@ -104,6 +104,9 @@ export class App extends React.Component{
                 break;
             case "presets":
                 renderFunc = (onClose) => <Presets key="presets-popup" onClose={onClose}/>;
+                break;
+            case "memory":
+                renderFunc = (onClose) => <Memory key="memory-popup" onClose={onClose}/>;
                 break;
             default:
                 alert("Not yet implemented.");
