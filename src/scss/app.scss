@@ -493,7 +493,7 @@ select{
     background-color: rgba(30,30,30,1.0);
     border: 1px solid rgb(130,130,130, 0.8);
     border-radius: 5px;
-    overflow: hidden;
+    //overflow: hidden;
 }
 
 .progress-fill{
@@ -501,12 +501,24 @@ select{
     width: 100%;
     background-color: rgb(177, 68, 18);
     opacity: 90%;
+    transition: transform 0.1s ease;
 
     &.yellow{
         background-color: rgb(218, 196, 1);
+    }
+
+    &.first{
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+
+    &.last{
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 }
 
 .progress-fill:hover{
     opacity: 100%;
+    transform: scaleY(1.1);
 }
