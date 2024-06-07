@@ -5,6 +5,7 @@ export class ApiRequestBase{
     maxTokens = 250
     temperature = 0.7
     top_p = 0.95
+    min_p = 0.05
     top_k = 0
     repeat_penalty = 1.0
     present_penalty = 0

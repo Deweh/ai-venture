@@ -13,6 +13,7 @@ export class SettingFields {
     static Temperature = "temperature"
     static TopP = "top_p"
     static TopK = "top_k"
+    static MinP = "min_p"
     static ApiStrictCompliance = "api-strict-compliance"
     static SysPromptCompat = "sys-prompt-compat"
     static PresentPenalty = "present-penalty"
@@ -38,7 +39,8 @@ export var AppSettings = {
     "present-penalty": 0,
     "freq-penalty": 0,
     "tokenizer": "llama2",
-    "context-limit": 8192
+    "context-limit": 8192,
+    "min_p": 0.05
 };
 
 export const SettingTextBox = (props) => {
@@ -238,6 +240,7 @@ class AIOptions extends React.Component{
                 <SettingTextBox data={this.props.data} displayName="Max Tokens:" id={SettingFields.MaxTokens} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Temperature:" id={SettingFields.Temperature} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Top-P:" id={SettingFields.TopP} isNumber={true}/>
+                <SettingTextBox data={this.props.data} displayName="Min-P:" id={SettingFields.MinP} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Top-K:" id={SettingFields.TopK} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Repeat Penalty:" id={SettingFields.RepeatPenalty} isNumber={true}/>
                 <SettingTextBox data={this.props.data} displayName="Frequency Penalty:" id={SettingFields.FrequencyPenalty} isNumber={true}/>

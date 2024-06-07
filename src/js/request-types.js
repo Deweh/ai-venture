@@ -16,6 +16,7 @@ class OpenAIRequestBase extends ApiRequestBase{
 
         if(!this.strict_compliance){
             result["top_k"] = Number.parseFloat(this.top_k);
+            result["min_p"] = Number.parseFloat(this.min_p);
         }
         return result;
     }

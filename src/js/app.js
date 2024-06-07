@@ -76,7 +76,8 @@ export class App extends React.Component{
         req.system_message = AppSettings[SettingFields.SystemPrompt];
         req.strict_compliance = AppSettings[SettingFields.ApiStrictCompliance];
         req.sys_prompt_compat = AppSettings[SettingFields.SysPromptCompat];
-        req.prompt_format = AppSettings[SettingFields.PromptFormat]
+        req.prompt_format = AppSettings[SettingFields.PromptFormat];
+        req.min_p = AppSettings[SettingFields.MinP];
         req.SendPrompt(this.storyBuffer, this.onStreamUpdate);
         this.lastRequest = req;
     }
